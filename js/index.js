@@ -1,6 +1,6 @@
 // Api urls
 
-const IndexApi = "https://api3.nikhilvermaultimate.workers.dev/home";
+const IndexApi = "https://api-anime-rouge.vercel.app/aniwatch/";
 const recentapi = "https://api3.nikhilvermaultimate.workers.dev/recent/";
 
 // Usefull functions
