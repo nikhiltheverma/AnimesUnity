@@ -1,10 +1,8 @@
-// Api urls
-
-const IndexApi = "https://api3.nikhilvermaultimate.workers.dev/home/";
-const recentapi = "https://api3.nikhilvermaultimate.workers.dev/recent/";
+// Api URLs
+const trendingApi = "https://animeunity.vercel.app/meta/anilist/trending";
+const recentApi = "https://animeunity.vercel.app/meta/anilist/recent-episodes?page=";
 
 // Usefull functions
-
 async function getJson(url) {
     try {
         const response = await fetch(url);
@@ -22,13 +20,10 @@ function shuffle(array) {
     let currentIndex = array.length,
         randomIndex;
 
-    // While there remain elements to shuffle.
     while (currentIndex > 0) {
-        // Pick a remaining element.
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex--;
 
-        // And swap it with the current element.
         [array[currentIndex], array[randomIndex]] = [
             array[randomIndex],
             array[currentIndex],
@@ -38,7 +33,7 @@ function shuffle(array) {
     return array;
 }
 
-// Adding slider animes (trending animes from anilist)
+// Trending animes from anilist
 async function getTrendingAnimes(data) {
     let SLIDER_HTML = "";
 
@@ -49,7 +44,7 @@ async function getTrendingAnimes(data) {
         let status = anime["status"];
         let genres = genresToString(anime["genres"]);
         let description = anime["description"];
-        let url = "./anime.html?anime=" + encodeURIComponent(title);
+        let url = "./anime.html?anime=" + encodeURIComponent(anime["id"]);
 
         let poster = anime["bannerImage"];
         if (poster == null) {
@@ -66,33 +61,8 @@ async function getTrendingAnimes(data) {
         '<a class="prev" onclick="plusSlides(-1)">&#10094;</a><a class="next" onclick="plusSlides(1)">&#10095;</a>';
 }
 
-// Adding popular animes (popular animes from gogoanime)
-async function getPopularAnimes(data) {
-    let POPULAR_HTML = "";
-
-    for (let pos = 0; pos < data.length; pos++) {
-        let anime = data[pos];
-        let title = anime["title"];
-        let id = anime["id"];
-        let url = "./anime.html?anime=" + id;
-        let image = anime["image"];
-        let subOrDub;
-        if (title.toLowerCase().includes("dub")) {
-            subOrDub = "DUB";
-        } else {
-            subOrDub = "SUB";
-        }
-
-        POPULAR_HTML += `<a href="${url}"><div class="poster la-anime"> <div id="shadow1" class="shadow"><div class="dubb"># ${
-            pos + 1
-        }</div> <div class="dubb dubb2">${subOrDub}</div> </div><div id="shadow2" class="shadow"> <img class="lzy_img" src="https://cdn.jsdelivr.net/gh/TechShreyash/AnimeDex@main/static/img/loading.gif" data-src="${image}"> </div><div class="la-details"> <h3>${title}</h3></div></div></a>`;
-    }
-
-    document.querySelector(".popularg").innerHTML = POPULAR_HTML;
-}
-// Adding popular animes (popular animes from gogoanime)
-async function getRecentAnimes(page = 1) {
-    const data = (await getJson(recentapi + page))["results"];
+// Recent episodes (anilist)
+async function getRecentAnimes(data) {
     let RECENT_HTML = "";
 
     for (let pos = 0; pos < data.length; pos++) {
@@ -101,15 +71,10 @@ async function getRecentAnimes(page = 1) {
         let id = anime["id"];
         let url = "./anime.html?anime=" + id;
         let image = anime["image"];
-        let ep = anime["episode"].split(" ")[1];
-        let subOrDub;
-        if (title.toLowerCase().includes("dub")) {
-            subOrDub = "DUB";
-        } else {
-            subOrDub = "SUB";
-        }
+        let episodeNumber = anime["episode"];
+        let subOrDub = anime["subOrDub"] === "dub" ? "DUB" : "SUB";
 
-        RECENT_HTML += `<a href="${url}"><div class="poster la-anime"> <div id="shadow1" class="shadow"><div class="dubb">${subOrDub}</div><div class="dubb dubb2">EP ${ep}</div> </div><div id="shadow2" class="shadow"> <img class="lzy_img" src="https://cdn.jsdelivr.net/gh/TechShreyash/AnimeDex@main/static/img/loading.gif" data-src="${image}"> </div><div class="la-details"> <h3>${title}</h3></div></div></a>`;
+        RECENT_HTML += `<a href="${url}"><div class="poster la-anime"> <div id="shadow1" class="shadow"><div class="dubb">${subOrDub}</div><div class="dubb dubb2">EP ${episodeNumber}</div> </div><div id="shadow2" class="shadow"> <img class="lzy_img" src="https://cdn.jsdelivr.net/gh/TechShreyash/AnimeDex@main/static/img/loading.gif" data-src="${image}"> </div><div class="la-details"> <h3>${title}</h3></div></div></a>`;
     }
 
     document.querySelector(".recento").innerHTML += RECENT_HTML;
@@ -156,6 +121,7 @@ function plusSlides(n) {
     showSlides((slideIndex += n));
     clickes = 1;
 }
+
 function currentSlide(n) {
     showSlides((slideIndex = n));
     clickes = 1;
@@ -184,11 +150,14 @@ function sleep(ms) {
 let page = 2;
 let isLoading = 0;
 let errCount = 0;
+
 function loadAnimes() {
     try {
         if (isLoading == 0) {
             isLoading = 1;
-            getRecentAnimes(page).then((data) => {
+            getJson(recentApi + page).then((data) => {
+                const results = data.results;
+                getRecentAnimes(results);
                 RefreshLazyLoader();
                 console.log("Recent animes loaded");
             });
@@ -215,26 +184,19 @@ window.addEventListener("scroll", () => {
 });
 
 // Running functions
-
-getJson(IndexApi).then((data) => {
-    data = data["results"];
-    const anilistTrending = data["anilistTrending"];
-    const gogoanimePopular = data["gogoPopular"];
-
-    getTrendingAnimes(anilistTrending).then((data) => {
+getJson(trendingApi).then((data) => {
+    const anilistTrending = data.results;
+    getTrendingAnimes(anilistTrending).then(() => {
         RefreshLazyLoader();
         showSlides(slideIndex);
         showSlides2();
         console.log("Sliders loaded");
     });
+});
 
-    getPopularAnimes(gogoanimePopular).then((data) => {
-        RefreshLazyLoader();
-        console.log("Popular animes loaded");
-    });
-
-    getRecentAnimes(1).then((data) => {
-        RefreshLazyLoader();
-        console.log("Recent animes loaded");
-    });
+getJson(recentApi + "1").then((data) => {
+    const recent = data.results;
+    getRecentAnimes(recent);
+    RefreshLazyLoader();
+    console.log("Recent animes loaded");
 });
