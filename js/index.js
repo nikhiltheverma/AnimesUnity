@@ -33,7 +33,7 @@ const getRecentAnimes = async () => {
         const data = await res.json();
 
         const results = data.results || [];
-        const container = document.querySelector(".recente");
+        const container = document.querySelector(".recento");
 
         if (!results.length) {
             container.innerHTML = "No recent anime found.";
