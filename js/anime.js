@@ -1,8 +1,10 @@
-// API URLs
-const animeapi = "https://animeunity.vercel.app/anime/zoro/info?id=";
-const episodeapi = "https://animeunity.vercel.app/anime/zoro/watch?episodeId=";
+// Api urls
 
-// Useful functions
+const animeapi = "https://api3.nikhilvermaultimate.workers.dev/anime/";
+const recommendationsapi = "https://api3.nikhilvermaultimate.workers.dev/recommendations/";
+
+// Usefull functions
+
 async function getJson(url) {
     try {
         const response = await fetch(url);
@@ -15,13 +17,13 @@ async function getJson(url) {
 function getGenreHtml(genres) {
     let ghtml = "";
     for (let i = 0; i < genres.length; i++) {
-        ghtml += `<a>${genres[i].trim()}</a>`;
+        ghtml += <a>${genres[i].trim()}</a>;
     }
     return ghtml;
 }
 
 async function RefreshLazyLoader() {
-    const imageObserver = new IntersectionObserver((entries) => {
+    const imageObserver = new IntersectionObserver((entries, imgObserver) => {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
                 const lazyImage = entry.target;
@@ -35,55 +37,135 @@ async function RefreshLazyLoader() {
     });
 }
 
-// Function to load anime from Zoro API (used by animeunity)
-async function loadAnimeFromZoro(data) {
+function getAnilistTitle(title) {
+    if (title["userPreferred"] != null) {
+        return title["userPreferred"];
+    } else if (title["english"] != null) {
+        return title["english"];
+    } else if (title["romaji"] != null) {
+        return title["romaji"];
+    } else if (title["native"] != null) {
+        return title["native"];
+    } else {
+        return "Unknown";
+    }
+}
+
+function getAnilistOtherTitle(title, current) {
+    if (title["userPreferred"] != null && title["userPreferred"] != current) {
+        return title["userPreferred"];
+    } else if (title["english"] != null && title["english"] != current) {
+        return title["english"];
+    } else if (title["romaji"] != null && title["romaji"] != current) {
+        return title["romaji"];
+    } else if (title["native"] != null && title["native"] != current) {
+        return title["native"];
+    } else {
+        return "Unknown";
+    }
+}
+
+// Function to get anime info from gogo id
+async function loadAnimeFromGogo(data) {
     document.documentElement.innerHTML = document.documentElement.innerHTML
-        .replaceAll("TITLE", data["title"])
+        .replaceAll("TITLE", data["name"])
         .replaceAll("IMG", data["image"])
-        .replaceAll("LANG", "EP " + data["totalEpisodes"])
+        .replaceAll("LANG", "EP " + data["episodes"].length)
         .replaceAll("TYPE", data["type"])
         .replaceAll("URL", window.location)
+        .replaceAll("SYNOPSIS", data["plot_summary"])
+        .replaceAll("OTHER", data["other_name"])
+        .replaceAll("TOTAL", data["episodes"].length)
+        .replaceAll("YEAR", data["released"])
+        .replaceAll("STATUS", data["status"])
+        .replaceAll("GENERES", getGenreHtml(data["genre"].split(",")));
+
+    document.getElementById("main-content").style.display = "block";
+    document.getElementById("load").style.display = "none";
+    document.getElementById("watch-btn").href =
+        "./episode.html?anime=" +
+        data["episodes"][0][1].split("-episode-")[0] +
+        "&episode=" +
+        data["episodes"][0][0];
+    const anime_title = data["title"];
+
+    console.log("Anime Info loaded");
+    RefreshLazyLoader();
+
+    getEpList(data["id"], data["episodes"]).then((data) => {
+        console.log("Episode list loaded");
+
+        getRecommendations(anime_title).then((data) => {
+            RefreshLazyLoader();
+            console.log("Anime Recommendations loaded");
+        });
+    });
+}
+
+// Function to get anime info from anilist search
+async function loadAnimeFromAnilist(data) {
+    const title = getAnilistTitle(data["title"]);
+
+    document.documentElement.innerHTML = document.documentElement.innerHTML
+        .replaceAll("TITLE", title)
+        .replaceAll("IMG", data["coverImage"]["large"])
+        .replaceAll("LANG", "EP " + data["episodes"])
+        .replaceAll("TYPE", data["format"])
+        .replaceAll("URL", window.location)
         .replaceAll("SYNOPSIS", data["description"])
-        .replaceAll("OTHER", "Alternative Title Not Available")
-        .replaceAll("TOTAL", data["totalEpisodes"])
-        .replaceAll("YEAR", data["releaseDate"])
+        .replaceAll("OTHER", getAnilistOtherTitle(data["title"], title))
+        .replaceAll("TOTAL", "EP " + data["episodes"])
+        .replaceAll("YEAR", data["seasonYear"])
         .replaceAll("STATUS", data["status"])
         .replaceAll("GENERES", getGenreHtml(data["genres"]));
 
     document.getElementById("main-content").style.display = "block";
     document.getElementById("load").style.display = "none";
 
-    if (data["episodes"] && data["episodes"].length > 0) {
-        document.getElementById("watch-btn").href =
-            "./episode.html?anime=" +
-            encodeURIComponent(data["episodes"][0]["id"].split("-episode-")[0]) +
-            "&episode=" +
-            data["episodes"][0]["number"];
-    }
-
     console.log("Anime Info loaded");
-    RefreshLazyLoader();
 
-    getEpList(data["episodes"]).then(() => {
-        console.log("Episode list loaded");
-    });
+    const recommendations = data["recommendations"];
+    let rechtml = "";
+
+    for (i = 0; i < recommendations.length; i++) {
+        let anime = recommendations[i];
+        let title = anime["title"]["userPreferred"];
+        rechtml += <a href="./anime.html?anime=${title}"><div class="poster la-anime"> <div id="shadow1" class="shadow"> <div class="dubb">${anime["meanScore"]} / 100</div><div class="dubb dubb2">${anime["format"]}</div></div><div id="shadow2" class="shadow"> <img class="lzy_img" src="https://cdn.jsdelivr.net/gh/TechShreyash/AnimeDex@main/static/img/loading.gif" data-src="${anime["coverImage"]["large"]}"> </div><div class="la-details"> <h3>${title}</h3> <div id="extra"> <span>${anime["status"]}</span> <span class="dot"></span> <span>EP ${anime["episodes"]}</span> </div></div></div></a>;
+    }
+    document.getElementById("latest2").innerHTML = rechtml;
+
+    document.getElementById("ephtmldiv").innerHTML =
+        '<a class="ep-btn">Anime Name Not Found On GogoAnime, Try Searching With A Different Name...</a>';
+
+    RefreshLazyLoader();
+    console.log("Anime Recommendations loaded");
 }
 
 // Function to get episode list
-async function getEpList(episodes) {
+async function getEpList(anime_id, total) {
     let ephtml = "";
 
-    for (let i = 0; i < episodes.length; i++) {
-        const ep = episodes[i];
-        const animeId = ep["id"].split("-episode-")[0];
-        const episodeNum = ep["number"];
-        ephtml += `<a class="ep-btn" href="./episode.html?anime=${animeId}&episode=${episodeNum}">${episodeNum}</a>`;
+    for (let i = 0; i < total.length; i++) {
+        x = total[i][1].split("-episode-");
+        ephtml += <a class="ep-btn" href="./episode.html?anime=${x[0]}&episode=${x[1]}">${x[1]}</a>;
     }
-
     document.getElementById("ephtmldiv").innerHTML = ephtml;
 }
 
-// Get anime query from URL
+// Function to get anime recommendations
+async function getRecommendations(anime_title) {
+    const data = await getJson(recommendationsapi + anime_title);
+    const recommendations = data["results"];
+    let rechtml = "";
+
+    for (i = 0; i < recommendations.length; i++) {
+        let anime = recommendations[i];
+        let title = anime["title"]["userPreferred"];
+        rechtml += <a href="./anime.html?anime=${title}"><div class="poster la-anime"> <div id="shadow1" class="shadow"> <div class="dubb">${anime["meanScore"]} / 100</div><div class="dubb dubb2">${anime["format"]}</div></div><div id="shadow2" class="shadow"> <img class="lzy_img" src="https://cdn.jsdelivr.net/gh/TechShreyash/AnimeDex@main/static/img/loading.gif" data-src="${anime["coverImage"]["large"]}"> </div><div class="la-details"> <h3>${title}</h3> <div id="extra"> <span>${anime["status"]}</span> <span class="dot"></span> <span>EP ${anime["episodes"]}</span> </div></div></div></a>;
+    }
+    document.getElementById("latest2").innerHTML = rechtml;
+}
+
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
@@ -91,8 +173,13 @@ if (urlParams.get("anime") == null) {
     window.location = "./index.html";
 }
 
-// Running the page
-getJson(animeapi + encodeURIComponent(urlParams.get("anime"))).then((data) => {
+//Running functions
+getJson(animeapi + urlParams.get("anime")).then((data) => {
     data = data["results"];
-    loadAnimeFromZoro(data);
+
+    if (data.source == "gogoanime") {
+        loadAnimeFromGogo(data);
+    } else if (data.source == "anilist") {
+        loadAnimeFromAnilist(data);
+    }
 });
