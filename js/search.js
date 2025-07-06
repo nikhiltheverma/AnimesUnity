@@ -1,8 +1,6 @@
-// const searchapi = "https://api3.nikhilvermaultimate.workers.dev/search/";
-// const searchapi = "https://animedex.in/src/assets/js/search.js?v=1.2";
 const searchapi = "https://animeunity.vercel.app/anime/zoro/search?query=";
-// Usefull functions
 
+// Useful functions
 async function getJson(url) {
     try {
         const response = await fetch(url);
@@ -38,11 +36,9 @@ function sentenceCase(str) {
 
 let hasNextPage = true;
 
-// Search function to get anime from gogo
+// Search function
 async function SearchAnime(query, page = 1) {
-    // const data = await getJson(searchapi + query + "?page=" + page);
     const data = await getJson(`${searchapi}${query}&page=${page}`);
-    
     const animes = data["results"];
     const contentdiv = document.getElementById("latest2");
     const loader = document.getElementById("load");
@@ -50,26 +46,28 @@ async function SearchAnime(query, page = 1) {
 
     for (let i = 0; i < animes.length; i++) {
         const anime = animes[i];
-        if (anime["title"].toLowerCase().includes("dub")) {
-            anime["subOrDub"] = "DUB";
-        } else {
-            anime["subOrDub"] = "SUB";
-        }
 
-        html += `<a href="./anime.html?anime=${
-            encodeURIComponent(anime["title"])
-        }"><div class="poster la-anime"> <div id="shadow1" class="shadow"> <div class="dubb">${anime[
-            "subOrDub"
-        ].toUpperCase()}</div></div><div id="shadow2" class="shadow"> <img class="lzy_img" src="https://cdn.jsdelivr.net/gh/TechShreyash/AnimeDex@main/static/img/loading.gif" data-src="${
-            anime["img"]
-        }"> </div><div class="la-details"> <h3>${sentenceCase(
-            anime["title"]
-        )}</h3> <div id="extra"> <span>${
-            anime["releaseDate"]
-        }</span> </div></div></div></a>`;
+        const subOrDub = anime["title"].toLowerCase().includes("dub") ? "DUB" : "SUB";
+
+        html += `<a href="./anime.html?anime=${encodeURIComponent(anime.id)}">
+            <div class="poster la-anime"> 
+                <div id="shadow1" class="shadow"> 
+                    <div class="dubb">${subOrDub}</div>
+                </div>
+                <div id="shadow2" class="shadow"> 
+                    <img class="lzy_img" src="https://cdn.jsdelivr.net/gh/TechShreyash/AnimeDex@main/static/img/loading.gif" data-src="${anime.image}"> 
+                </div>
+                <div class="la-details"> 
+                    <h3>${sentenceCase(anime.title)}</h3> 
+                    <div id="extra"> 
+                        <span>${anime.releaseDate || "Unknown"}</span> 
+                    </div>
+                </div>
+            </div>
+        </a>`;
     }
-    contentdiv.innerHTML += html;
 
+    contentdiv.innerHTML += html;
     loader.style.display = "none";
     contentdiv.style.display = "block";
 
@@ -99,12 +97,12 @@ window.addEventListener("scroll", () => {
         window.scrollY + window.innerHeight >=
         document.documentElement.scrollHeight
     ) {
-        if (hasNextPage == true) {
+        if (hasNextPage === true) {
             SearchAnime(query, page).then((data) => {
                 hasNextPage = data;
                 page += 1;
                 RefreshLazyLoader();
-                console.log("Search animes loaded");
+                console.log("Search animes loaded (more)");
             });
         }
     }
