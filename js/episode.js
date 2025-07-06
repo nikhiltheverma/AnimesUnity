@@ -26,7 +26,7 @@ async function loadVideo(title, sources) {
 
     if (!sources || sources.length === 0) {
         serversbtn.innerHTML = `<div class="sitem error-text">No servers available for this episode.</div>`;
-        iframe.style.display = "none";
+        iframe.src = "";
         return;
     }
 
@@ -55,6 +55,7 @@ function selectServer(btn) {
     btn.classList.add("sactive");
 
     iframe.src = btn.dataset.value;
+    iframe.style.display = "block"; // ✅ Ensure iframe is visible
 }
 
 // Load full episode list for the anime
@@ -66,7 +67,7 @@ async function getEpList(animeId) {
     ephtmldiv.innerHTML = "";
 
     episodes.forEach(ep => {
-        ephtmldiv.innerHTML += `<a class="ep-btn" href="./episode.html?anime=${animeId}&episode=${ep.id}">EP ${ep.number}</a>`;
+        ephtmldiv.innerHTML += `<a class="ep-btn" href="./episode.html?anime=${animeId}&episode=${ep.id}">EP ${ep.number || ep.id.split("$").pop()}</a>`;
     });
 
     return episodes;
@@ -84,7 +85,7 @@ function getSelectorBtn(eplist, currentId) {
         const prevEp = eplist[index - 1];
         html += `<a class="btns" href="./episode.html?anime=${urlParams.get("anime")}&episode=${prevEp.id}">
             <button class="sbtn inline-flex text-white bg-indigo-500 border-0 py-2 px-6 hover:bg-indigo-600 rounded text-lg">
-                <i class="fa fa-arrow-circle-left"></i> Episode ${prevEp.number}
+                <i class="fa fa-arrow-circle-left"></i> Episode ${prevEp.number || prevEp.id.split("$").pop()}
             </button></a>`;
     }
 
@@ -92,7 +93,7 @@ function getSelectorBtn(eplist, currentId) {
         const nextEp = eplist[index + 1];
         html += `<a class="btns" href="./episode.html?anime=${urlParams.get("anime")}&episode=${nextEp.id}">
             <button class="sbtn inline-flex text-white bg-indigo-500 border-0 py-2 px-6 hover:bg-indigo-600 rounded text-lg">
-                Episode ${nextEp.number} <i class="fa fa-arrow-circle-right" style="margin-left:10px"></i>
+                Episode ${nextEp.number || nextEp.id.split("$").pop()} <i class="fa fa-arrow-circle-right" style="margin-left:10px"></i>
             </button></a>`;
     }
 
@@ -107,8 +108,8 @@ const episodeId = urlParams.get("episode");
 if (!animeId || !episodeId) {
     window.location.href = "./index.html";
 } else {
-    // Start Execution
-    getJson(episodeapi + episodeId).then((data) => {
+    // ✅ Use encoded episode ID in API
+    getJson(episodeapi + encodeURIComponent(episodeId)).then((data) => {
         if (!data) {
             console.error("Episode not found");
             return;
