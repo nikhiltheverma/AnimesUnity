@@ -74,8 +74,9 @@ async function SearchAnime(query, page = 1) {
     return data["hasNextPage"];
 }
 
-const params = new URLSearchParams(window.location.search);
-const query = params.get("query");
+// ✅ FIXED LINE: Correct variable used here
+const urlparams = new URLSearchParams(window.location.search);
+const query = urlparams.get("query");
 let page = 1;
 
 if (query == null) {
