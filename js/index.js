@@ -93,7 +93,8 @@ async function getPopularAnimes(data) {
 
     document.querySelector(".popularg").innerHTML = POPULAR_HTML;
 }
-// Adding popular animes (popular animes from gogoanime)
+
+// Adding recent animes (recent episodes from API)
 async function getRecentAnimes(page = 1) {
     const data = (await getJson(recentapi + page))["results"];
     let RECENT_HTML = "";
@@ -101,8 +102,8 @@ async function getRecentAnimes(page = 1) {
     for (let pos = 0; pos < data.length; pos++) {
         let anime = data[pos];
         let title = anime["title"];
-        let id = anime["episodeId"];
-        let url = "./anime.html?anime=" + encodeURIComponent(title);
+        let id = anime["id"]; // ✅ FIXED HERE: Use correct anime ID
+        let url = "./anime.html?anime=" + id;
         let image = anime["image"];
         let ep = anime["episodeNumber"];
         let subOrDub = "SUB"; // No info for DUB in this API
@@ -117,7 +118,6 @@ async function getRecentAnimes(page = 1) {
 
     document.querySelector(".recento").innerHTML += RECENT_HTML;
 }
-
 
 // Slider functions
 let slideIndex = 0;
@@ -219,11 +219,10 @@ window.addEventListener("scroll", () => {
 });
 
 // Running functions
-
 getJson(IndexApi).then((data) => {
     const recent = data["results"];
 
-getTrendingAnimes(shuffle(recent).slice(0, 10)).then(() => {
+    getTrendingAnimes(shuffle(recent).slice(0, 10)).then(() => {
         RefreshLazyLoader();
         showSlides(slideIndex);
         showSlides2();
@@ -240,4 +239,3 @@ getTrendingAnimes(shuffle(recent).slice(0, 10)).then(() => {
         console.log("Recent animes loaded");
     });
 });
-
