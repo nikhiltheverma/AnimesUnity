@@ -1,5 +1,5 @@
 // const searchapi = "https://api3.nikhilvermaultimate.workers.dev/search/";
-const searchapi = "https://animedex.in/src/assets/js/search.js?v=1.2";
+// const searchapi = "https://animedex.in/src/assets/js/search.js?v=1.2";
 const searchapi = "https://animeunity.vercel.app/anime/zoro/search?query=";
 // Usefull functions
 
