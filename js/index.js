@@ -102,22 +102,23 @@ async function getRecentAnimes(page = 1) {
     for (let pos = 0; pos < data.length; pos++) {
         let anime = data[pos];
         let title = anime["title"];
-        let id = anime["id"];
-        let url = "./anime.html?anime=" + id;
+        let id = anime["episodeId"];
+        let url = "./anime.html?anime=" + encodeURIComponent(title);
         let image = anime["image"];
-        let ep = anime["episode"].split(" ")[1];
-        let subOrDub;
-        if (title.toLowerCase().includes("dub")) {
-            subOrDub = "DUB";
-        } else {
-            subOrDub = "SUB";
-        }
+        let ep = anime["episodeNumber"];
+        let subOrDub = "SUB"; // No info for DUB in this API
 
-        RECENT_HTML += `<a href="${url}"><div class="poster la-anime"> <div id="shadow1" class="shadow"><div class="dubb">${subOrDub}</div><div class="dubb dubb2">EP ${ep}</div> </div><div id="shadow2" class="shadow"> <img class="lzy_img" src="https://cdn.jsdelivr.net/gh/TechShreyash/AnimeDex@main/static/img/loading.gif" data-src="${image}"> </div><div class="la-details"> <h3>${title}</h3></div></div></a>`;
+        RECENT_HTML += `<a href="${url}"><div class="poster la-anime">
+        <div id="shadow1" class="shadow"><div class="dubb">${subOrDub}</div><div class="dubb dubb2">EP ${ep}</div></div>
+        <div id="shadow2" class="shadow"> 
+        <img class="lzy_img" src="https://cdn.jsdelivr.net/gh/TechShreyash/AnimeDex@main/static/img/loading.gif" data-src="${image}"> 
+        </div>
+        <div class="la-details"> <h3>${title}</h3></div></div></a>`;
     }
 
     document.querySelector(".recento").innerHTML += RECENT_HTML;
 }
+
 
 // Slider functions
 let slideIndex = 0;
@@ -223,7 +224,7 @@ window.addEventListener("scroll", () => {
 getJson(IndexApi).then((data) => {
     const recent = data["results"];
 
-    getTrendingAnimes(recent).then(() => {
+getTrendingAnimes(shuffle(recent).slice(0, 10)).then(() => {
         RefreshLazyLoader();
         showSlides(slideIndex);
         showSlides2();
