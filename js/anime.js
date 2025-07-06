@@ -1,6 +1,5 @@
-const animeapi = "https://animeunity.vercel.app/anime/zoro/info?id=";
+const animeapi = "https://api.consumet.org/anime/zoro/info?id=";
 
-// Fetch JSON data
 async function getJson(url) {
     try {
         const response = await fetch(url);
@@ -10,7 +9,6 @@ async function getJson(url) {
     }
 }
 
-// Format genres into HTML links
 function getGenreHtml(genres) {
     let ghtml = "";
     for (let i = 0; i < genres.length; i++) {
@@ -19,7 +17,6 @@ function getGenreHtml(genres) {
     return ghtml;
 }
 
-// Lazy load images
 async function RefreshLazyLoader() {
     const imageObserver = new IntersectionObserver((entries, imgObserver) => {
         entries.forEach((entry) => {
@@ -35,24 +32,21 @@ async function RefreshLazyLoader() {
     });
 }
 
-// Capitalize each word
 function sentenceCase(str) {
     if (!str) return "";
     return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 }
 
-// Populate episode list
 async function getEpList(anime_id, episodes) {
     let ephtml = "";
     for (let i = 0; i < episodes.length; i++) {
         const ep = episodes[i];
         const epNumber = ep.number || i + 1;
-        ephtml += `<a class="ep-btn" href="./episode.html?anime=${anime_id}&episode=${ep.id}">EP ${epNumber}</a>`;
+        ephtml += `<a class="ep-btn" href="./episode.html?anime=${encodeURIComponent(anime_id)}&episode=${encodeURIComponent(ep.id)}">EP ${epNumber}</a>`;
     }
     document.getElementById("ephtmldiv").innerHTML = ephtml;
 }
 
-// Main loader
 async function loadAnime(data) {
     const {
         id,
@@ -66,7 +60,6 @@ async function loadAnime(data) {
         releaseDate
     } = data;
 
-    // Replace placeholders
     document.documentElement.innerHTML = document.documentElement.innerHTML
         .replaceAll("TITLE", title)
         .replaceAll("IMG", image)
@@ -80,13 +73,11 @@ async function loadAnime(data) {
         .replaceAll("STATUS", status)
         .replaceAll("GENERES", getGenreHtml(genres || []));
 
-    // Display main content
     document.getElementById("main-content").style.display = "block";
     document.getElementById("load").style.display = "none";
 
-    // Set Watch Now button (if episode exists)
     if (episodes && episodes.length > 0) {
-        document.getElementById("watch-btn").href = `./episode.html?anime=${id}&episode=${episodes[0].id}`;
+        document.getElementById("watch-btn").href = `./episode.html?anime=${encodeURIComponent(id)}&episode=${encodeURIComponent(episodes[0].id)}`;
         getEpList(id, episodes);
     } else {
         document.getElementById("watch-btn").style.display = "none";
@@ -97,14 +88,13 @@ async function loadAnime(data) {
     console.log("Anime Info loaded");
 }
 
-// Entry point
 const urlParams = new URLSearchParams(window.location.search);
 const animeId = urlParams.get("anime");
 
 if (!animeId) {
     window.location.href = "./index.html";
 } else {
-    getJson(animeapi + animeId).then((data) => {
+    getJson(animeapi + encodeURIComponent(animeId)).then((data) => {
         if (data) loadAnime(data);
         else console.error("No anime data found.");
     });
