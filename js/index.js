@@ -1,7 +1,10 @@
 // Api urls
 
-const IndexApi = "https://api3.nikhilvermaultimate.workers.dev/home";
-const recentapi = "https://api3.nikhilvermaultimate.workers.dev/recent/";
+// const IndexApi = "https://api3.nikhilvermaultimate.workers.dev/home";
+// const recentapi = "https://api3.nikhilvermaultimate.workers.dev/recent/";
+
+const IndexApi = "https://animedex.in/src/assets/js/search.js?v=1.2";
+const recentapi = "https://animedex.in/src/assets/js/search.js?v=1.2";
 
 async function getJson(url) {
     try {
