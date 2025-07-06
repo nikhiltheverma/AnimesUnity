@@ -1,5 +1,6 @@
 // const searchapi = "https://api3.nikhilvermaultimate.workers.dev/search/";
-const searchapi = "https://animedex.in/src/assets/js/search.js?v=1.2";
+// const searchapi = "https://animedex.in/src/assets/js/search.js?v=1.2";
+const searchapi = "https://animeunity.vercel.app/anime/zoro/search?query=";
 // Usefull functions
 
 async function getJson(url) {
@@ -39,8 +40,9 @@ let hasNextPage = true;
 
 // Search function to get anime from gogo
 async function SearchAnime(query, page = 1) {
-    const data = await getJson(searchapi + query + "?page=" + page);
-
+    // const data = await getJson(searchapi + query + "?page=" + page);
+    const data = await getJson(`${searchapi}${query}&page=${page}`);
+    
     const animes = data["results"];
     const contentdiv = document.getElementById("latest2");
     const loader = document.getElementById("load");
