@@ -7,7 +7,8 @@
 const BASE_URL = "https://animeunity.vercel.app/anime/zoro";
 const IndexApi = "https://animeunity.vercel.app/anime/zoro/recent-episodes"; // for recent episodes
 const recentapi = "https://animeunity.vercel.app/anime/zoro/recent-episodes?page="; // paginated recent
-const searchApi = "https://animeunity.vercel.app/anime/zoro/search?query="; // optional use
+const searchapi = "https://animedex.in/src/assets/js/search.js?v=1.2";
+ // optional use
 
 async function getJson(url) {
     try {
