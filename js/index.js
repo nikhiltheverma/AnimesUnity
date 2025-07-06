@@ -1,7 +1,13 @@
-// Api urls
+// Old Api urls
 
-const IndexApi = "https://api3.nikhilvermaultimate.workers.dev/home";
-const recentapi = "https://api3.nikhilvermaultimate.workers.dev/recent/";
+// const IndexApi = "https://api3.nikhilvermaultimate.workers.dev/home";
+// const recentapi = "https://api3.nikhilvermaultimate.workers.dev/recent/";
+
+// New Api urls
+const BASE_URL = "https://animeunity.vercel.app/anime/zoro";
+const IndexApi = "https://animeunity.vercel.app/anime/zoro/recent-episodes"; // for recent episodes
+const recentapi = "https://animeunity.vercel.app/anime/zoro/recent-episodes?page="; // paginated recent
+const searchApi = "https://animeunity.vercel.app/anime/zoro/search?query="; // optional use
 
 async function getJson(url) {
     try {
@@ -215,24 +221,23 @@ window.addEventListener("scroll", () => {
 // Running functions
 
 getJson(IndexApi).then((data) => {
-    data = data["results"];
-    const anilistTrending = data["anilistTrending"];
-    const gogoanimePopular = data["gogoPopular"];
+    const recent = data["results"];
 
-    getTrendingAnimes(anilistTrending).then((data) => {
+    getTrendingAnimes(recent).then(() => {
         RefreshLazyLoader();
         showSlides(slideIndex);
         showSlides2();
         console.log("Sliders loaded");
     });
 
-    getPopularAnimes(gogoanimePopular).then((data) => {
+    getPopularAnimes(recent).then(() => {
         RefreshLazyLoader();
         console.log("Popular animes loaded");
     });
 
-    getRecentAnimes(1).then((data) => {
+    getRecentAnimes(1).then(() => {
         RefreshLazyLoader();
         console.log("Recent animes loaded");
     });
 });
+
