@@ -1,4 +1,4 @@
-const searchapi = "https://animeunity.vercel.app/anime/zoro/search?query=";
+const searchapi = "https://api.consumet.org/anime/zoro/";
 
 // Useful functions
 async function getJson(url) {
@@ -38,7 +38,7 @@ let hasNextPage = true;
 
 // Search function
 async function SearchAnime(query, page = 1) {
-    const data = await getJson(`${searchapi}${query}&page=${page}`);
+    const data = await getJson(`${searchapi}${encodeURIComponent(query)}?page=${page}`);
     const animes = data["results"];
     const contentdiv = document.getElementById("latest2");
     const loader = document.getElementById("load");
@@ -46,8 +46,7 @@ async function SearchAnime(query, page = 1) {
 
     for (let i = 0; i < animes.length; i++) {
         const anime = animes[i];
-
-        const subOrDub = anime["title"].toLowerCase().includes("dub") ? "DUB" : "SUB";
+        const subOrDub = anime.subOrDub?.toUpperCase() || "SUB";
 
         html += `<a href="./anime.html?anime=${encodeURIComponent(anime.id)}">
             <div class="poster la-anime"> 
@@ -74,7 +73,6 @@ async function SearchAnime(query, page = 1) {
     return data["hasNextPage"];
 }
 
-// ✅ FIXED LINE: Correct variable used here
 const urlparams = new URLSearchParams(window.location.search);
 const query = urlparams.get("query");
 let page = 1;
