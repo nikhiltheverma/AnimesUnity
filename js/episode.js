@@ -1,5 +1,6 @@
 const animeapi = "https://animeunity.vercel.app/anime/zoro/info?id=";
-const episodeapi = "https://animeunity.vercel.app/anime/zoro/watch?episodeId=";
+// ✅ Replace old episode API with new HiAnime API
+const episodeapi = "https://animeunity.vercel.app/api/v2/hianime/episode/sources?animeEpisodeId=";
 
 // Fetch JSON from URL
 async function getJson(url) {
@@ -17,14 +18,14 @@ function capitalizeFirstLetter(string) {
 }
 
 // Load video servers into iframe
-async function loadVideo(title, sources) {
+async function loadVideo(title, data) {
     const iframe = document.getElementById("AnimeDexFrame");
     const serversbtn = document.getElementById("serversbtn");
     const epTitleElem = document.getElementById("ep-name");
 
     epTitleElem.innerHTML = title || "Episode";
 
-    if (!sources || sources.length === 0) {
+    if (!data || !data.sources || data.sources.length === 0) {
         serversbtn.innerHTML = `<div class="sitem error-text">No servers available for this episode.</div>`;
         iframe.src = "";
         return;
@@ -32,11 +33,15 @@ async function loadVideo(title, sources) {
 
     serversbtn.innerHTML = ""; // Clear previous buttons
 
-    sources.forEach((source, i) => {
+    data.sources.forEach((source, i) => {
         const serverNum = i + 1;
+
+        // ✅ Add proxy before .m3u8 url
+        const proxyUrl = `https://<your-proxy-domain>/${source.url}`;
+
         const btn = `<div class="sitem">
-            <a class="sobtn ${i === 0 ? 'sactive' : ''}" onclick="selectServer(this)" data-value="./embed.html?url=${source.url}">
-                Zoro Server ${serverNum}
+            <a class="sobtn ${i === 0 ? 'sactive' : ''}" onclick="selectServer(this)" data-value="./embed.html?url=${proxyUrl}">
+                HiAnime Server ${serverNum} (${source.quality || 'auto'})
             </a>
         </div>`;
         serversbtn.innerHTML += btn;
@@ -108,19 +113,19 @@ const episodeId = urlParams.get("episode");
 if (!animeId || !episodeId) {
     window.location.href = "./index.html";
 } else {
-    // ✅ Use encoded episode ID in API
-    getJson(episodeapi + encodeURIComponent(episodeId)).then((data) => {
-        if (!data) {
+    // ✅ Use encoded episode ID in HiAnime API
+    getJson(`${episodeapi}${encodeURIComponent(episodeId)}&server=hd-1&category=sub`).then((res) => {
+        if (!res || !res.success) {
             console.error("Episode not found");
             return;
         }
 
-        const epTitle = data.title || "Episode";
-        const sources = data.sources;
+        const epTitle = res.data.title || "Episode";
+        const epData = res.data;
 
         document.documentElement.innerHTML = document.documentElement.innerHTML.replaceAll("{{ title }}", epTitle);
 
-        loadVideo(epTitle, sources);
+        loadVideo(epTitle, epData);
 
         getEpList(animeId).then(eplist => {
             getSelectorBtn(eplist, episodeId);
