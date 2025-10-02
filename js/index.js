@@ -109,7 +109,7 @@ async function getRecentAnimes(page = 1) {
         let subOrDub = "SUB"; // No info for DUB in this API
 
         RECENT_HTML += `<a href="${url}"><div class="poster la-anime">
-        <div id="shadow1" class="shadow"><div class="dubb">${subOrDub}</div><div class="dubb dubb2">EP ${ep}</div></div>
+        <div id="shadow1" class="shadow"><div class="dubb">${subOrDub}</div><div class="dubb dubb2">${ep}</div></div>
         <div id="shadow2" class="shadow"> 
         <img class="lzy_img" src="https://cdn.jsdelivr.net/gh/TechShreyash/AnimeDex@main/static/img/loading.gif" data-src="${image}"> 
         </div>
