@@ -1,5 +1,5 @@
-const animeapi = "https://animeunity.vercel.app/anime/zoro/info?id=";
-const episodeapi = "https://animeunity.vercel.app/anime/zoro/watch?episodeId=";
+const animeapi = "https://animeunity.vercel.app/anime/9anime/info?id=";
+const episodeapi = "https://animeunity.vercel.app/anime/9anime/watch?episodeId=";
 
 // Fetch JSON from URL
 async function getJson(url) {
