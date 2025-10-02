@@ -1,4 +1,4 @@
-const animeapi = "https://animeunity.vercel.app/anime/9anime/info?id=";
+const animeapi = "https://animeunity.vercel.app/anime/9anime/info?{id}";
 const episodeapi = "https://api.consumet.org/anime/9anime/watch/{episodeId}?server={serverName}";
 
 // Fetch JSON from URL
